@@ -1,0 +1,227 @@
+<Window x:Class="DiskCleaner.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="C 盘清理" Icon="Assets/DiskCleaner.ico" Width="1110" Height="770" MinWidth="860" MinHeight="650"
+        WindowStartupLocation="CenterScreen" Closing="OnClosing" xml:lang="zh-CN"
+        Background="{StaticResource Canvas}" Foreground="{StaticResource Ink}"
+        FontFamily="Segoe UI, Microsoft YaHei UI" FontSize="13">
+    <Grid Margin="26,20,26,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="42" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+            <Border Background="{StaticResource Deep}" Width="40" Height="40" CornerRadius="9"
+                    VerticalAlignment="Center" Margin="0,0,12,0">
+                <Grid Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Border BorderBrush="{StaticResource Mint}" BorderThickness="1.5" CornerRadius="3" />
+                    <Border Height="1.5" VerticalAlignment="Center" Background="{StaticResource Mint}" />
+                    <Ellipse Width="3" Height="3" Fill="{StaticResource Mint}"
+                             HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,4,3" />
+                </Grid>
+            </Border>
+            <TextBlock Text="C 盘清理" FontSize="27" FontWeight="SemiBold" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Background="{StaticResource Deep}" CornerRadius="11"
+                Padding="21,15,22,17" Margin="0,0,0,11">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="160" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="本地磁盘（C:）" Foreground="White" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding DriveUsage}" Foreground="White" Margin="0,5,0,9" />
+                    <ProgressBar Height="8" Maximum="100" Value="{Binding DrivePercent, Mode=OneWay}"
+                                 BorderThickness="0" Background="{StaticResource DriveTrack}" Foreground="{StaticResource Mint}"
+                                 AutomationProperties.Name="C 盘已用空间比例" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock Text="可用空间" Foreground="{StaticResource Mint}" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding DriveFree}" Foreground="White" FontSize="28" FontWeight="SemiBold"
+                               HorizontalAlignment="Right" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <TabControl Grid.Row="2">
+            <TabItem Header="垃圾清理">
+                <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Line}"
+                        BorderThickness="1" CornerRadius="9" Padding="16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="48" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="48" />
+                        </Grid.RowDefinitions>
+                        <DockPanel LastChildFill="True">
+                            <Button DockPanel.Dock="Right" Content="扫描清理项" Command="{Binding ScanCleanupCommand}"
+                                    Style="{StaticResource PrimaryButton}" VerticalAlignment="Top" Margin="12,0,0,0" />
+                        <TextBlock Text="{Binding CleanupStatus}" Style="{StaticResource Hint}" ToolTip="{Binding CleanupStatus}"
+                                       TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,0,10"
+                                       AutomationProperties.LiveSetting="Polite" />
+                        </DockPanel>
+
+                        <Grid Grid.Row="1" IsEnabled="{Binding CanEdit}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="324" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ListBox ItemsSource="{Binding CleanupGroups}" SelectedItem="{Binding SelectedGroup}"
+                                     AutomationProperties.Name="清理类别" BorderThickness="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" Margin="0,0,14,0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="28" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <CheckBox IsChecked="{Binding IsChecked}" IsEnabled="{Binding HasFiles}"
+                                                      AutomationProperties.Name="{Binding Name}" VerticalAlignment="Center" />
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,5,0">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding Description}" Style="{StaticResource Hint}"
+                                                           FontSize="11" Margin="0,4,0,0" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding SizeText}" HorizontalAlignment="Right"
+                                                           FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
+                                                <TextBlock Text="{Binding CountText}" Style="{StaticResource Hint}"
+                                                           HorizontalAlignment="Right" FontSize="11" Margin="0,4,0,0" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <Grid Grid.Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <StackPanel Margin="0,0,0,10">
+                                    <TextBlock Text="文件明细" FontWeight="SemiBold" FontSize="15" />
+                                    <TextBlock Text="{Binding SelectedGroup.Root}" ToolTip="{Binding SelectedGroup.Root}"
+                                               Style="{StaticResource Hint}" Margin="0,3,0,0" />
+                                </StackPanel>
+                                <DataGrid x:Name="PreviewGrid" Grid.Row="1" ItemsSource="{Binding PreviewFiles}"
+                                          AutomationProperties.Name="清理文件明细">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="文件名" Binding="{Binding Name}" Width="1.4*"
+                                                            ElementStyle="{StaticResource CellText}" />
+                                        <DataGridTextColumn Header="大小" Binding="{Binding SizeText}" Width="85"
+                                                            SortMemberPath="Size" ElementStyle="{StaticResource CellText}" />
+                                        <DataGridTextColumn Header="完整路径" Binding="{Binding FullPath}" Width="*"
+                                                            ElementStyle="{StaticResource CellText}" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <TextBlock Grid.Row="1" Text="此类别暂无可清理文件">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource EmptyGrid}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasItems, ElementName=PreviewGrid}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </Grid>
+                        <DockPanel Grid.Row="2" LastChildFill="True" Margin="0,12,0,0">
+                            <Button DockPanel.Dock="Right" Content="清理所选" Command="{Binding CleanCommand}"
+                                    Style="{StaticResource PrimaryButton}" Margin="12,0,0,0" />
+                            <TextBlock Text="{Binding SelectedSummary}" VerticalAlignment="Center"
+                                       FontWeight="SemiBold" />
+                        </DockPanel>
+                    </Grid>
+                </Border>
+            </TabItem>
+            <TabItem Header="大文件">
+                <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Line}"
+                        BorderThickness="1" CornerRadius="9" Padding="16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="48" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="48" />
+                        </Grid.RowDefinitions>
+                        <DockPanel LastChildFill="True">
+                            <Button DockPanel.Dock="Right" Content="扫描大文件" Command="{Binding ScanLargeCommand}"
+                                    Style="{StaticResource PrimaryButton}" VerticalAlignment="Top" Margin="12,0,0,0" />
+                            <ComboBox x:Name="ThresholdPicker" DockPanel.Dock="Right" Width="95" Height="36"
+                                      ItemsSource="{Binding SizeOptions}" SelectedIndex="{Binding ThresholdIndex}"
+                                      DisplayMemberPath="Label" IsEnabled="{Binding CanEdit}" VerticalAlignment="Top"
+                                      AutomationProperties.Name="最小大小" />
+                            <Label DockPanel.Dock="Right" Target="{Binding ElementName=ThresholdPicker}"
+                                   Content="最小大小" Padding="8,9,8,0" Foreground="{StaticResource Muted}" />
+                            <TextBlock Text="{Binding LargeStatus}" Style="{StaticResource Hint}" ToolTip="{Binding LargeStatus}"
+                                       TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,0,10"
+                                       AutomationProperties.LiveSetting="Polite" />
+                        </DockPanel>
+                        <DataGrid x:Name="LargeGrid" Grid.Row="1" ItemsSource="{Binding LargeFiles}"
+                                  SelectionMode="Extended" SelectionUnit="FullRow"
+                                  SelectionChanged="OnLargeSelectionChanged" IsEnabled="{Binding CanEdit}"
+                                  AutomationProperties.Name="大文件列表">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="文件名" Binding="{Binding Name}" Width="1.3*"
+                                                    ElementStyle="{StaticResource CellText}" />
+                                <DataGridTextColumn Header="大小" Binding="{Binding SizeText}" Width="94"
+                                                    SortMemberPath="Size" ElementStyle="{StaticResource CellText}" />
+                                <DataGridTextColumn Header="完整路径" Binding="{Binding FullPath}" Width="2*"
+                                                    ElementStyle="{StaticResource CellText}" />
+                                <DataGridTextColumn Header="修改时间" Binding="{Binding ModifiedLocal, StringFormat=yyyy-MM-dd HH:mm}"
+                                                    Width="150" ElementStyle="{StaticResource CellText}" />
+                                <DataGridTextColumn Header="状态" Binding="{Binding DeletionStatus}" Width="83"
+                                                    ElementStyle="{StaticResource CellText}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <TextBlock Grid.Row="1" Text="暂无大文件结果">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource EmptyGrid}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasItems, ElementName=LargeGrid}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <DockPanel Grid.Row="2" Margin="0,12,0,0">
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="12,0,0,0">
+                                <Button Content="删除" Command="{Binding DeleteLargeCommand}" MinWidth="68"
+                                        Style="{StaticResource ActionButton}" Foreground="{StaticResource Danger}"
+                                        Margin="0,0,8,0" />
+                                <Button Content="在资源管理器中定位" Command="{Binding LocateCommand}"
+                                        Style="{StaticResource ActionButton}" ToolTip="选中单个文件后可定位"
+                                        ToolTipService.ShowOnDisabled="True" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding LargeSelectionSummary}" Style="{StaticResource Hint}"
+                                       VerticalAlignment="Center" ToolTip="{Binding LargeSelectionSummary}" />
+                        </DockPanel>
+                    </Grid>
+                </Border>
+            </TabItem>
+        </TabControl>
+
+        <DockPanel Grid.Row="3" VerticalAlignment="Bottom" LastChildFill="True"
+                   Visibility="{Binding IsBusy, Converter={StaticResource BoolVisibility}}">
+            <Button DockPanel.Dock="Right" Content="取消扫描" Command="{Binding CancelScanCommand}"
+                    Style="{StaticResource ActionButton}" Height="30" Margin="10,0,0,0">
+                <Button.Visibility>
+                    <Binding Path="CanCancel" Converter="{StaticResource BoolVisibility}" />
+                </Button.Visibility>
+            </Button>
+            <ProgressBar DockPanel.Dock="Left" Width="94" Height="5" Margin="0,0,12,0"
+                         Foreground="{StaticResource Accent}" IsIndeterminate="{Binding IsBusy}" />
+            <TextBlock Text="{Binding ProgressText}" Style="{StaticResource Hint}" Height="30"
+                       Padding="0,7,0,0" AutomationProperties.LiveSetting="Polite" />
+        </DockPanel>
+    </Grid>
+</Window>
